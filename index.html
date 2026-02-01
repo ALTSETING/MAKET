@@ -1,1 +1,1523 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RestaurantAI Studio — 3D персоналізація, чат-боти та автоматизація доставки</title>
+  <meta name="description" content="Платформа для ресторанів: 3D-меню, AI-чатботи, автоматизація прийому доставок, інтеграції з POS/CRM та аналітика." />
+  <meta name="theme-color" content="#0b0f1a" />
+  <style>
+    :root{
+      --bg:#070A12;
+      --card:#0b1020;
+      --card2:#0c1428;
+      --text:#EAF0FF;
+      --muted:#AAB5D6;
+      --line:rgba(255,255,255,.10);
+      --glow:rgba(110,231,255,.18);
+      --accent:#6ee7ff;
+      --accent2:#ff7a00;
+      --good:#38f7b8;
+      --bad:#ff5a7a;
+
+      --radius:18px;
+      --shadow: 0 18px 50px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.40);
+
+      --max: 1180px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1100px 550px at 20% -10%, rgba(110,231,255,.20), transparent 60%),
+        radial-gradient(900px 450px at 110% 10%, rgba(255,122,0,.16), transparent 55%),
+        radial-gradient(800px 420px at 50% 110%, rgba(56,247,184,.10), transparent 55%),
+        linear-gradient(180deg, #050710 0%, #070A12 40%, #04060E 100%);
+      overflow-x:hidden;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    .container{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
+
+    /* top nav */
+    .nav{
+      position:sticky; top:0; z-index:60;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,10,18,.85), rgba(7,10,18,.40));
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .nav-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 0;
+      gap:18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; letter-spacing:.3px;
+    }
+    .logo{
+      width:38px; height:38px; border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.24), transparent 40%),
+        linear-gradient(135deg, var(--accent) 0%, rgba(110,231,255,.20) 35%, rgba(255,122,0,.22) 70%, var(--accent2) 100%);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.10), 0 18px 40px rgba(110,231,255,.12);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo:after{
+      content:"";
+      position:absolute; inset:-80%;
+      background: radial-gradient(circle, rgba(255,255,255,.20), transparent 60%);
+      transform: rotate(20deg);
+      animation: shine 5s linear infinite;
+    }
+    @keyframes shine{
+      0%{ transform:translateX(-20%) rotate(20deg); opacity:.55 }
+      50%{ opacity:.9 }
+      100%{ transform:translateX(20%) rotate(20deg); opacity:.55 }
+    }
+
+    .nav-links{
+      display:flex; align-items:center; gap:16px;
+      color:var(--muted);
+      font-weight:600;
+      font-size:14px;
+    }
+    .nav-links a{
+      padding:8px 10px; border-radius:10px;
+      border:1px solid transparent;
+      transition:.2s ease;
+    }
+    .nav-links a:hover{
+      color:var(--text);
+      border-color:rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .nav-cta{
+      display:flex; align-items:center; gap:10px;
+    }
+
+    .btn{
+      border:0; cursor:pointer;
+      padding:11px 14px;
+      border-radius:12px;
+      font-weight:800;
+      color:var(--text);
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      transition:.2s ease;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); }
+    .btn:active{ transform: translateY(0px); }
+
+    .btn-primary{
+      background: linear-gradient(135deg, rgba(110,231,255,.95), rgba(255,122,0,.95));
+      border:1px solid rgba(255,255,255,.18);
+      color:#08101d;
+      box-shadow: 0 18px 45px rgba(110,231,255,.14), 0 18px 45px rgba(255,122,0,.12);
+    }
+    .btn-primary:hover{ filter: brightness(1.05); }
+    .btn-soft{
+      background: rgba(110,231,255,.08);
+      border:1px solid rgba(110,231,255,.20);
+    }
+
+    /* hero */
+    .hero{
+      padding: 54px 0 24px;
+      position:relative;
+    }
+    .grid-hero{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:28px;
+      align-items:stretch;
+    }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background: rgba(110,231,255,.08);
+      border:1px solid rgba(110,231,255,.18);
+      color:var(--text);
+      font-weight:800;
+      font-size:13px;
+      letter-spacing:.2px;
+    }
+    .pill .dot{
+      width:8px; height:8px; border-radius:50%;
+      background: var(--good);
+      box-shadow: 0 0 0 6px rgba(56,247,184,.12);
+    }
+
+    h1{
+      margin:14px 0 10px;
+      font-size: clamp(30px, 4vw, 50px);
+      line-height:1.05;
+      letter-spacing:-.6px;
+    }
+    .grad{
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.55));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .sub{
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.6;
+      margin: 0 0 18px;
+      max-width: 58ch;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin: 16px 0 16px;
+    }
+
+    .trust{
+      display:flex; flex-wrap:wrap; gap:10px;
+      margin-top:14px;
+      color:rgba(234,240,255,.78);
+      font-size:13px;
+    }
+    .trust span{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:12px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .trust i{
+      width:8px;height:8px;border-radius:50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(110,231,255,.10);
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .panel:before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(700px 220px at 20% 0%, rgba(110,231,255,.16), transparent 60%),
+        radial-gradient(700px 240px at 80% 10%, rgba(255,122,0,.14), transparent 60%),
+        radial-gradient(550px 220px at 50% 110%, rgba(56,247,184,.10), transparent 60%);
+      pointer-events:none;
+      filter: blur(2px);
+    }
+    .panel-inner{ position:relative; padding:16px; }
+
+    /* showcase card right */
+    .showcase{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .card-mini{
+      background: rgba(7,10,18,.55);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: var(--shadow2);
+    }
+    .row{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .kpi{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    .kpi .box{
+      padding:12px;
+      border-radius:14px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .kpi .num{
+      font-weight:900;
+      font-size:18px;
+      letter-spacing:-.3px;
+    }
+    .kpi .lbl{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+    }
+
+    /* sections */
+    section{ padding: 34px 0; }
+    .section-title{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:14px;
+      margin-bottom:14px;
+    }
+    h2{
+      margin:0;
+      font-size: clamp(22px, 2.6vw, 34px);
+      letter-spacing:-.4px;
+    }
+    .section-desc{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+      max-width: 70ch;
+      font-size: 15px;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+      margin-top:14px;
+    }
+    .card{
+      padding:16px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow2);
+      position:relative;
+      overflow:hidden;
+      min-height: 150px;
+    }
+    .card:after{
+      content:"";
+      position:absolute; inset:-1px;
+      background: radial-gradient(420px 180px at 30% 0%, rgba(110,231,255,.12), transparent 60%);
+      opacity:.8;
+      pointer-events:none;
+    }
+    .card > *{ position:relative; }
+    .card h3{
+      margin: 4px 0 8px;
+      font-size:16px;
+      letter-spacing:-.2px;
+    }
+    .card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+    }
+    .ico{
+      width:42px; height:42px;
+      display:grid; place-items:center;
+      border-radius:14px;
+      background: rgba(110,231,255,.10);
+      border:1px solid rgba(110,231,255,.22);
+      box-shadow: 0 18px 45px rgba(110,231,255,.10);
+      font-weight:900;
+      color: rgba(234,240,255,.95);
+      letter-spacing:-.5px;
+    }
+    .ico.orange{
+      background: rgba(255,122,0,.10);
+      border-color: rgba(255,122,0,.22);
+      box-shadow: 0 18px 45px rgba(255,122,0,.10);
+    }
+    .ico.green{
+      background: rgba(56,247,184,.10);
+      border-color: rgba(56,247,184,.22);
+      box-shadow: 0 18px 45px rgba(56,247,184,.08);
+    }
+
+    /* split */
+    .split{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:14px;
+      align-items:stretch;
+      margin-top:14px;
+    }
+    .list{
+      display:grid;
+      gap:10px;
+      margin-top:10px;
+    }
+    .li{
+      display:flex; gap:10px;
+      padding:12px;
+      border-radius:16px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .check{
+      width:22px; height:22px;
+      border-radius:8px;
+      background: rgba(56,247,184,.12);
+      border:1px solid rgba(56,247,184,.22);
+      display:grid; place-items:center;
+      flex:0 0 auto;
+      margin-top:1px;
+    }
+    .check svg{ width:14px; height:14px; }
+    .li b{ display:block; margin-bottom:4px; }
+    .li span{ color:var(--muted); font-size:14px; line-height:1.55; }
+
+    /* model viewer area */
+    .model-wrap{
+      padding:16px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+    }
+    .model-top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin-bottom:10px;
+    }
+    .badge{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:rgba(234,240,255,.85);
+      font-weight:800;
+      font-size:12px;
+    }
+    .badge i{
+      width:8px;height:8px;border-radius:50%;
+      background: var(--accent2);
+      box-shadow: 0 0 0 6px rgba(255,122,0,.10);
+    }
+    .model-note{
+      color:var(--muted);
+      font-size:13px;
+      margin:10px 0 0;
+      line-height:1.5;
+    }
+
+    /* pricing */
+    .pricing{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+      margin-top:14px;
+    }
+    .price{
+      padding:18px;
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--shadow2);
+      position:relative;
+      overflow:hidden;
+    }
+    .price.featured{
+      border-color: rgba(110,231,255,.26);
+      box-shadow: 0 18px 55px rgba(110,231,255,.10), 0 18px 55px rgba(0,0,0,.35);
+      transform: translateY(-4px);
+    }
+    .price h3{ margin:0 0 6px; }
+    .price .tag{
+      display:inline-flex;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(110,231,255,.10);
+      border:1px solid rgba(110,231,255,.22);
+      font-weight:900;
+      font-size:12px;
+      color:rgba(234,240,255,.92);
+    }
+    .amount{
+      font-size:34px;
+      font-weight:1000;
+      letter-spacing:-.6px;
+      margin: 10px 0 6px;
+    }
+    .amount small{
+      font-size:14px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .price ul{
+      margin:12px 0 14px;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:10px;
+      color:rgba(234,240,255,.86);
+      font-size:14px;
+    }
+    .price li{
+      display:flex; gap:10px; align-items:flex-start;
+      padding:10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+    .price .cta{ width:100%; }
+
+    /* contact */
+    .contact{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    .form{
+      padding:18px;
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--shadow2);
+    }
+    label{ display:block; font-size:13px; color:rgba(234,240,255,.75); font-weight:800; margin: 10px 0 6px; }
+    input, textarea, select{
+      width:100%;
+      padding: 12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(7,10,18,.45);
+      color: var(--text);
+      outline:none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    textarea{ min-height:120px; resize:vertical; }
+    input:focus, textarea:focus, select:focus{
+      border-color: rgba(110,231,255,.35);
+      box-shadow: 0 0 0 5px rgba(110,231,255,.08);
+    }
+    .form-row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .hint{ margin-top:10px; color:var(--muted); font-size:13px; line-height:1.6; }
+
+    /* footer */
+    footer{
+      padding: 24px 0 40px;
+      color: rgba(234,240,255,.75);
+      border-top: 1px solid rgba(255,255,255,.08);
+      margin-top: 26px;
+    }
+    .footer-inner{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+      flex-wrap:wrap;
+    }
+    .mini-links{ display:flex; flex-wrap:wrap; gap:10px; color:rgba(234,240,255,.72); }
+    .mini-links a{
+      padding:8px 10px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+    .mini-links a:hover{ background: rgba(255,255,255,.05); }
+
+    /* chatbot widget */
+    .chat-fab{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 90;
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: linear-gradient(135deg, rgba(110,231,255,.95), rgba(255,122,0,.95));
+      color: #07101c;
+      font-weight: 1000;
+      box-shadow: 0 18px 55px rgba(110,231,255,.16), 0 18px 55px rgba(255,122,0,.12);
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      user-select:none;
+      transition:.2s ease;
+    }
+    .chat-fab:hover{ transform: translateY(-2px); filter: brightness(1.04); }
+    .chat{
+      position: fixed;
+      right: 18px;
+      bottom: 84px;
+      width: min(380px, calc(100% - 36px));
+      height: 520px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(7,10,18,.70);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      z-index: 90;
+      display:none;
+    }
+    .chat.open{ display:block; }
+    .chat-head{
+      padding: 14px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .chat-title{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 1000;
+      letter-spacing:-.2px;
+    }
+    .chat-title small{
+      display:block;
+      color: var(--muted);
+      font-weight:800;
+      font-size:12px;
+      margin-top:2px;
+      letter-spacing:0;
+    }
+    .chip{
+      display:inline-flex; gap:8px; align-items:center;
+      padding: 7px 10px;
+      border-radius:999px;
+      background: rgba(56,247,184,.10);
+      border: 1px solid rgba(56,247,184,.20);
+      color: rgba(234,240,255,.88);
+      font-weight: 900;
+      font-size: 12px;
+      white-space:nowrap;
+    }
+    .chip i{ width:8px; height:8px; border-radius:50%; background: var(--good); box-shadow: 0 0 0 6px rgba(56,247,184,.12); }
+    .chat-body{
+      height: calc(520px - 58px - 66px);
+      padding: 12px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .msg{
+      max-width: 86%;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(234,240,255,.92);
+      line-height:1.45;
+      font-size:14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    }
+    .msg.bot{
+      border-color: rgba(110,231,255,.16);
+      background: rgba(110,231,255,.06);
+    }
+    .msg.user{
+      margin-left:auto;
+      border-color: rgba(255,122,0,.16);
+      background: rgba(255,122,0,.06);
+    }
+    .chat-foot{
+      padding: 10px 10px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      background: rgba(255,255,255,.02);
+    }
+    .chat-foot input{
+      border-radius: 14px;
+      padding: 12px 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(7,10,18,.45);
+      color: var(--text);
+      width:100%;
+    }
+    .send{
+      flex:0 0 auto;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      font-weight: 1000;
+      cursor:pointer;
+    }
+    .send:hover{ background: rgba(255,255,255,.10); }
+    .close{
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(234,240,255,.92);
+      cursor:pointer;
+      font-weight:1000;
+    }
+    .close:hover{ background: rgba(255,255,255,.08); }
+
+    /* responsive */
+    @media (max-width: 980px){
+      .grid-hero{ grid-template-columns:1fr; }
+      .cards{ grid-template-columns:1fr; }
+      .split{ grid-template-columns:1fr; }
+      .pricing{ grid-template-columns:1fr; }
+      .contact{ grid-template-columns:1fr; }
+      .nav-links{ display:none; }
+    }
+
+    /* subtle reveal */
+    .reveal{ opacity:0; transform: translateY(10px); transition: .6s ease; }
+    .reveal.show{ opacity:1; transform: translateY(0); }
+  </style>
+
+  <!-- 3D viewer: model-viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+
+<body>
+  <!-- NAV -->
+  <div class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="#top" aria-label="RestaurantAI Studio">
+        <div class="logo"></div>
+        <div>
+          RestaurantAI <span style="opacity:.75;">Studio</span><br>
+          <span style="font-size:12px;color:var(--muted);font-weight:800;">3D • AI • Automation</span>
+        </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="#solutions">Рішення</a>
+        <a href="#how">Як працює</a>
+        <a href="#demo">Демо</a>
+        <a href="#pricing">Пакети</a>
+        <a href="#contact">Контакт</a>
+      </div>
+
+      <div class="nav-cta">
+        <a class="btn btn-soft" href="#demo">Подивитись демо</a>
+        <button class="btn btn-primary" onclick="scrollToId('contact')">Запросити презентацію</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header id="top" class="hero">
+    <div class="container">
+      <div class="grid-hero">
+        <div class="reveal">
+          <span class="pill"><span class="dot"></span> Платформа для ресторанів нового покоління</span>
+
+          <h1 class="grad">
+            Персоналізація та автоматизація ресторану:
+            <span style="color:transparent;background:linear-gradient(135deg, var(--accent), var(--accent2));-webkit-background-clip:text;background-clip:text;">
+              3D-меню, AI-чатбот і доставка без хаосу
+            </span>
+          </h1>
+
+          <p class="sub">
+            Ми створюємо “розумний” ресторанний досвід: 3D-візуалізація страв і простору, чат-боти зі штучним інтелектом,
+            автоматичний прийом заявок на доставку та інтеграції з вашими процесами.
+            Результат — <b>більше замовлень</b>, <b>менше ручної роботи</b>, <b>вища конверсія</b>.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="scrollToId('contact')">Хочу партнерську зустріч</button>
+            <a class="btn" href="#solutions">Що саме ми робимо</a>
+            <a class="btn btn-soft" href="#demo">Демо 3D + чат</a>
+          </div>
+
+          <div class="trust">
+            <span><i></i> 3D-перегляд страв/інтер’єру</span>
+            <span><i></i> AI-чатбот “офіціант” 24/7</span>
+            <span><i></i> Автоприйом доставок</span>
+            <span><i></i> Аналітика і повторні продажі</span>
+          </div>
+        </div>
+
+        <div class="panel reveal" style="min-height: 420px;">
+          <div class="panel-inner showcase">
+            <div class="card-mini">
+              <div class="row">
+                <div style="font-weight:1000;letter-spacing:-.2px;">Панель керування рестораном</div>
+                <span class="badge"><i></i> Live Demo</span>
+              </div>
+              <div class="kpi">
+                <div class="box">
+                  <div class="num">+27%</div>
+                  <div class="lbl">конверсія меню</div>
+                </div>
+                <div class="box">
+                  <div class="num">-42%</div>
+                  <div class="lbl">навантаження на персонал</div>
+                </div>
+                <div class="box">
+                  <div class="num">24/7</div>
+                  <div class="lbl">прийом замовлень</div>
+                </div>
+              </div>
+              <p style="margin:10px 0 0;color:var(--muted);line-height:1.55;font-size:13px;">
+                Показники — демонстраційні. Реальні результати залежать від меню, трафіку та інтеграцій.
+              </p>
+            </div>
+
+            <div class="card-mini">
+              <div class="row">
+                <div style="display:flex;gap:10px;align-items:center;">
+                  <div class="ico">3D</div>
+                  <div>
+                    <div style="font-weight:1000;">3D-меню + AR-прев’ю</div>
+                    <div style="color:var(--muted);font-size:13px;line-height:1.4;">
+                      Гості бачать страву “як наживо” → замовляють швидше і впевненіше.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-mini">
+              <div class="row">
+                <div style="display:flex;gap:10px;align-items:center;">
+                  <div class="ico orange">AI</div>
+                  <div>
+                    <div style="font-weight:1000;">AI-чатбот для замовлень</div>
+                    <div style="color:var(--muted);font-size:13px;line-height:1.4;">
+                      Відповідає на питання, пропонує комбо, приймає доставку, збирає контакти.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-mini">
+              <div class="row">
+                <div style="display:flex;gap:10px;align-items:center;">
+                  <div class="ico green">⚡</div>
+                  <div>
+                    <div style="font-weight:1000;">Автоматизація доставки</div>
+                    <div style="color:var(--muted);font-size:13px;line-height:1.4;">
+                      Заявка → підтвердження → статуси → кур’єр → повідомлення клієнту.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- SOLUTIONS -->
+  <section id="solutions">
+    <div class="container">
+      <div class="section-title reveal">
+        <div>
+          <h2 class="grad">Що ми даємо ресторану</h2>
+          <p class="section-desc">
+            Один продукт — кілька сильних ефектів: піднімаємо середній чек, автоматизуємо заявки на доставку,
+            зменшуємо навантаження на персонал та робимо бренд технологічним і “вау”.
+          </p>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card reveal">
+          <div class="ico">🍽</div>
+          <h3>3D-меню та візуалізація</h3>
+          <p>3D-моделі страв (або інтер’єру) на сайті. За бажанням — AR-перегляд на телефоні.</p>
+        </div>
+
+        <div class="card reveal">
+          <div class="ico orange">🤖</div>
+          <h3>AI-чатбот “офіціант”</h3>
+          <p>Пояснює склад, алергени, рекомендує позиції, збирає замовлення і дані клієнта 24/7.</p>
+        </div>
+
+        <div class="card reveal">
+          <div class="ico green">🚚</div>
+          <h3>Автоприйом заявок на доставку</h3>
+          <p>Форма/чат → заявка → підтвердження → статуси. Менше пропущених лідів і “ручних” помилок.</p>
+        </div>
+
+        <div class="card reveal">
+          <div class="ico">📈</div>
+          <h3>Аналітика та повторні продажі</h3>
+          <p>Воронка замовлень, популярні позиції, час піків. Автоматичні пропозиції та ремаркетинг.</p>
+        </div>
+
+        <div class="card reveal">
+          <div class="ico orange">🔗</div>
+          <h3>Інтеграції</h3>
+          <p>POS/CRM/Google Sheets/Telegram/Email/SMS. Підключаємо під ваші процеси.</p>
+        </div>
+
+        <div class="card reveal">
+          <div class="ico green">🧩</div>
+          <h3>Персоналізація бренду</h3>
+          <p>Окремий стиль під ресторан, тон спілкування чат-бота, акції, комбо та сценарії для вашої аудиторії.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="container">
+      <div class="section-title reveal">
+        <div>
+          <h2 class="grad">Як це працює</h2>
+          <p class="section-desc">
+            Ми робимо рішення так, щоб партнеру було легко: швидкий запуск, красивий фронт, і зрозумілий процес обробки заявок.
+          </p>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="panel reveal">
+          <div class="panel-inner">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div class="ico">01</div>
+              <div>
+                <div style="font-weight:1000;">Збір інформації</div>
+                <div style="color:var(--muted);font-size:13px;line-height:1.5;">
+                  Меню, фотографії, зони доставки, графік, стиль бренду, сценарії продажів.
+                </div>
+              </div>
+            </div>
+
+            <div class="list">
+              <div class="li">
+                <div class="check">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>3D-контент</b>
+                  <span>Готуємо 3D-моделі ключових позицій меню або інтер’єру (за потреби — оптимізація під мобільні).</span>
+                </div>
+              </div>
+
+              <div class="li">
+                <div class="check">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>AI-логіка чат-бота</b>
+                  <span>Налаштовуємо тон, пропозиції (комбо/апсейл), питання-уточнення та сценарії підтвердження доставки.</span>
+                </div>
+              </div>
+
+              <div class="li">
+                <div class="check">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Автоматизація заявки</b>
+                  <span>Заявки летять у потрібний канал: Telegram/CRM/Email/таблицю + статуси для клієнта.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel reveal">
+          <div class="panel-inner">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div class="ico orange">02</div>
+              <div>
+                <div style="font-weight:1000;">Запуск і контроль</div>
+                <div style="color:var(--muted);font-size:13px;line-height:1.5;">
+                  Публікація сайту, тестування, навчання персоналу, аналітика й покращення.
+                </div>
+              </div>
+            </div>
+
+            <div class="list">
+              <div class="li">
+                <div class="check" style="background:rgba(110,231,255,.10);border-color:rgba(110,231,255,.22);">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Швидкий “партнерський” демо-режим</b>
+                  <span>Показуємо рішення як продукт: дизайн, 3D, чат, заявки, інтеграції.</span>
+                </div>
+              </div>
+
+              <div class="li">
+                <div class="check" style="background:rgba(255,122,0,.10);border-color:rgba(255,122,0,.22);">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Оптимізація під продаж</b>
+                  <span>Апсейл у чаті, “комбо дня”, тригери на повторне замовлення, рекомендації.</span>
+                </div>
+              </div>
+
+              <div class="li">
+                <div class="check" style="background:rgba(56,247,184,.10);border-color:rgba(56,247,184,.22);">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Підтримка та розвиток</b>
+                  <span>Оновлення меню/контенту, нові сценарії, інтеграції, A/B-тести.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section id="demo">
+    <div class="container">
+      <div class="section-title reveal">
+        <div>
+          <h2 class="grad">Демо: 3D-модель + досвід “як в додатку”</h2>
+          <p class="section-desc">
+            Нижче — демонстрація 3D (плейсхолдер). Для партнера ми підставляємо ваші моделі страв, логіку меню та бота.
+          </p>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="model-wrap reveal">
+          <div class="model-top">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div class="ico">🍜</div>
+              <div>
+                <div style="font-weight:1000;">3D-перегляд страви</div>
+                <div style="color:var(--muted);font-size:13px;">Крути, зум, AR (за підтримки пристрою)</div>
+              </div>
+            </div>
+            <span class="badge"><i></i> 3D Viewer</span>
+          </div>
+
+          <!-- Public demo model from modelviewer.dev; replace with your .glb later -->
+          <model-viewer
+            src="https://modelviewer.dev/shared-assets/models/ShopifyModels/Chair.glb"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            touch-action="pan-y"
+            exposure="1.0"
+            shadow-intensity="0.7"
+            style="width:100%;height:340px;border-radius:18px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);">
+          </model-viewer>
+
+          <p class="model-note">
+            <b>Під партнера:</b> підставляємо вашу 3D-модель (GLB/GLTF), додаємо назву/опис/алергени/апсейл (“додати соус/напій”).
+          </p>
+        </div>
+
+        <div class="panel reveal">
+          <div class="panel-inner">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div class="ico orange">💬</div>
+              <div>
+                <div style="font-weight:1000;">AI-чатбот (демо)</div>
+                <div style="color:var(--muted);font-size:13px;line-height:1.45;">
+                  Натисни кнопку чату справа внизу — він симулює прийом доставки і збір даних.
+                </div>
+              </div>
+            </div>
+
+            <div class="list" style="margin-top:14px;">
+              <div class="li">
+                <div class="check" style="background:rgba(255,122,0,.10);border-color:rgba(255,122,0,.22);">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Відповіді за секунди</b>
+                  <span>Меню, склад, алергени, “що порадите?”, акції, графік, адреса.</span>
+                </div>
+              </div>
+
+              <div class="li">
+                <div class="check" style="background:rgba(110,231,255,.10);border-color:rgba(110,231,255,.22);">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Автозбір заявки</b>
+                  <span>Ім’я, телефон, адреса, позиції, коментар (домофон/поверх), спосіб оплати.</span>
+                </div>
+              </div>
+
+              <div class="li">
+                <div class="check" style="background:rgba(56,247,184,.10);border-color:rgba(56,247,184,.22);">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <b>Доставка без “людського фактору”</b>
+                  <span>Заявка йде в канал менеджера/кухні + статуси для клієнта (підтверджено/в дорозі).</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-soft" onclick="openChat(true)">Відкрити демо чат</button>
+              <button class="btn" onclick="scrollToId('contact')">Попросити інтеграцію</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="container">
+      <div class="section-title reveal">
+        <div>
+          <h2 class="grad">Пакети для партнерів</h2>
+          <p class="section-desc">
+            Можемо стартувати з MVP за 7–14 днів, а потім масштабувати. Ціни — приклад для презентації (налаштуєш під себе).
+          </p>
+        </div>
+      </div>
+
+      <div class="pricing">
+        <div class="price reveal">
+          <span class="tag">Start</span>
+          <h3 style="margin-top:10px;">Швидкий запуск</h3>
+          <div class="amount">€399 <small>/ 1 раз</small></div>
+          <ul>
+            <li><span style="font-weight:1000;">✓</span> Лендинг + меню + форма заявки</li>
+            <li><span style="font-weight:1000;">✓</span> Базовий чат-скрипт (плейсхолдер)</li>
+            <li><span style="font-weight:1000;">✓</span> Канал заявок (Email/Telegram)</li>
+            <li><span style="font-weight:1000;">✓</span> 1–2 правки дизайну</li>
+          </ul>
+          <button class="btn cta" onclick="scrollToId('contact')">Запросити пропозицію</button>
+        </div>
+
+        <div class="price featured reveal">
+          <span class="tag">Pro</span>
+          <h3 style="margin-top:10px;">3D + AI + доставка</h3>
+          <div class="amount">€999 <small>/ 1 раз</small></div>
+          <ul>
+            <li><span style="font-weight:1000;">✓</span> 3D-моделі (3–6 позицій)</li>
+            <li><span style="font-weight:1000;">✓</span> AI-чатбот з сценаріями</li>
+            <li><span style="font-weight:1000;">✓</span> Автоприйом заявок + статуси</li>
+            <li><span style="font-weight:1000;">✓</span> Аналітика + події</li>
+          </ul>
+          <button class="btn btn-primary cta" onclick="scrollToId('contact')">Хочу Pro</button>
+        </div>
+
+        <div class="price reveal">
+          <span class="tag">Enterprise</span>
+          <h3 style="margin-top:10px;">Інтеграції та масштаб</h3>
+          <div class="amount">Custom <small>/ проект</small></div>
+          <ul>
+            <li><span style="font-weight:1000;">✓</span> POS/CRM інтеграції</li>
+            <li><span style="font-weight:1000;">✓</span> Мультифіліали, ролі, права</li>
+            <li><span style="font-weight:1000;">✓</span> A/B-тести та оптимізація</li>
+            <li><span style="font-weight:1000;">✓</span> SLA + підтримка</li>
+          </ul>
+          <button class="btn cta" onclick="scrollToId('contact')">Обговорити Enterprise</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-title reveal">
+        <div>
+          <h2 class="grad">Запит на партнерство / демо</h2>
+          <p class="section-desc">
+            Залиш заявку — ми підготуємо демонстрацію під конкретний ресторан (бренд, меню, сценарії бота, канал заявок).
+          </p>
+        </div>
+      </div>
+
+      <div class="contact">
+        <div class="form reveal">
+          <form id="leadForm">
+            <div class="form-row">
+              <div>
+                <label>Ім’я</label>
+                <input name="name" placeholder="Ваше ім’я" required />
+              </div>
+              <div>
+                <label>Телефон / Telegram</label>
+                <input name="contact" placeholder="+48... або @username" required />
+              </div>
+            </div>
+
+            <label>Формат бізнесу</label>
+            <select name="type" required>
+              <option value="">Оберіть…</option>
+              <option>Кафе</option>
+              <option>Ресторан</option>
+              <option>Фастфуд</option>
+              <option>Кухня-дарк (delivery only)</option>
+              <option>Мережа</option>
+            </select>
+
+            <label>Що найбільше потрібно?</label>
+            <select name="need" required>
+              <option value="">Оберіть…</option>
+              <option>AI-чатбот для прийому замовлень</option>
+              <option>Автоматизація доставки та заявок</option>
+              <option>3D-меню / AR-презентація</option>
+              <option>Все разом (3D + AI + Automation)</option>
+            </select>
+
+            <label>Коротко про задачу</label>
+            <textarea name="message" placeholder="Наприклад: хочемо прийом доставок через чат, заявки в Telegram + 3D меню для топ-страв."></textarea>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+              <button class="btn btn-primary" type="submit">Надіслати заявку</button>
+              <button class="btn" type="button" onclick="fillDemo()">Заповнити демо даними</button>
+            </div>
+
+            <p class="hint">
+              ⚙️ Зараз форма показова: після submit вона створює “картку заявки” нижче і може імітувати відправку в Telegram/CRM.
+              Під ваш бекенд — підключимо реальний endpoint.
+            </p>
+          </form>
+        </div>
+
+        <div class="panel reveal">
+          <div class="panel-inner">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div class="ico green">📌</div>
+              <div>
+                <div style="font-weight:1000;">Що партнер отримає на демо</div>
+                <div style="color:var(--muted);font-size:13px;line-height:1.5;">
+                  Коротко і “продаюче”, щоб легко погодити запуск.
+                </div>
+              </div>
+            </div>
+
+            <div class="list" style="margin-top:14px;">
+              <div class="li">
+                <div class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div><b>Сайт під бренд</b><span>Дизайн, який виглядає дорого, + адаптація під мобільний.</span></div>
+              </div>
+              <div class="li">
+                <div class="check" style="background:rgba(110,231,255,.10);border-color:rgba(110,231,255,.22);"><svg viewBox="0 0 24 24" fill="none"><path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div><b>3D-контент</b><span>3D-моделі страв/простору → “вау” і вища довіра до замовлення.</span></div>
+              </div>
+              <div class="li">
+                <div class="check" style="background:rgba(255,122,0,.10);border-color:rgba(255,122,0,.22);"><svg viewBox="0 0 24 24" fill="none"><path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div><b>AI-чатбот</b><span>Питання → рекомендації → заявка на доставку → статуси.</span></div>
+              </div>
+              <div class="li">
+                <div class="check" style="background:rgba(56,247,184,.10);border-color:rgba(56,247,184,.22);"><svg viewBox="0 0 24 24" fill="none"><path d="M20 7L10 17l-5-5" stroke="rgba(234,240,255,.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div><b>Автоматизація заявок</b><span>Менше пропущених замовлень, менше ручних помилок, швидше підтвердження.</span></div>
+              </div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <div style="font-weight:1000;margin-bottom:8px;">Остання заявка (демо)</div>
+              <div id="leadPreview" class="card-mini" style="min-height: 96px;">
+                <div style="color:var(--muted);font-size:14px;line-height:1.6;">
+                  Поки що немає. Заповни форму — і тут з’явиться “картка” для партнера/менеджера.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <div style="display:flex;gap:10px;align-items:center;font-weight:1000;">
+          <div class="logo" style="width:34px;height:34px;border-radius:12px;"></div>
+          RestaurantAI Studio
+        </div>
+        <div style="margin-top:8px;color:var(--muted);max-width:60ch;line-height:1.6;font-size:13px;">
+          3D-персоналізація • AI-чатботи • Автоматизація доставки • Інтеграції • Аналітика
+        </div>
+        <div style="margin-top:10px;color:rgba(234,240,255,.70);font-size:12px;">
+          © <span id="year"></span> RestaurantAI Studio. Demo landing.
+        </div>
+      </div>
+
+      <div class="mini-links">
+        <a href="#solutions">Рішення</a>
+        <a href="#demo">Демо</a>
+        <a href="#pricing">Пакети</a>
+        <a href="#contact">Контакт</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CHATBOT UI -->
+  <div class="chat" id="chat">
+    <div class="chat-head">
+      <div class="chat-title">
+        <div class="ico orange" style="width:40px;height:40px;border-radius:14px;">AI</div>
+        <div>
+          RestaurantAI Bot
+          <small>Демо: прийом доставки / відповіді на питання</small>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span class="chip"><i></i> online</span>
+        <button class="close" onclick="openChat(false)">✕</button>
+      </div>
+    </div>
+
+    <div class="chat-body" id="chatBody"></div>
+
+    <div class="chat-foot">
+      <input id="chatInput" placeholder="Напиши: 'хочу доставку', 'меню', 'час доставки'..." />
+      <button class="send" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+
+  <button class="chat-fab" title="Відкрити чат" onclick="openChat()">
+    💬
+  </button>
+
+  <script>
+    // Smooth scroll helper
+    function scrollToId(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+
+    // Reveal on scroll
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting) e.target.classList.add('show');
+      });
+    }, { threshold: .08 });
+
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Lead form demo (replace with real backend endpoint later)
+    const leadForm = document.getElementById('leadForm');
+    const leadPreview = document.getElementById('leadPreview');
+
+    leadForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fd = new FormData(leadForm);
+      const payload = Object.fromEntries(fd.entries());
+
+      leadPreview.innerHTML = `
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+          <div style="font-weight:1000;letter-spacing:-.2px;">Нова заявка</div>
+          <span class="badge"><i></i> ${new Date().toLocaleString('uk-UA')}</span>
+        </div>
+        <div style="margin-top:10px;color:rgba(234,240,255,.9);line-height:1.55;font-size:14px;">
+          <b>${escapeHtml(payload.name)}</b> • <span style="color:rgba(234,240,255,.75)">${escapeHtml(payload.contact)}</span><br/>
+          <span style="color:rgba(234,240,255,.80)">Бізнес:</span> ${escapeHtml(payload.type)}<br/>
+          <span style="color:rgba(234,240,255,.80)">Потреба:</span> ${escapeHtml(payload.need)}<br/>
+          <span style="color:rgba(234,240,255,.80)">Коментар:</span> ${escapeHtml(payload.message || "—")}
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-soft" onclick="fakeSend('Telegram')">Імітувати відправку в Telegram</button>
+          <button class="btn" onclick="fakeSend('CRM')">Імітувати відправку в CRM</button>
+        </div>
+      `;
+
+      // small "success" feedback
+      toast("Заявку збережено (демо). Підключимо ваш бекенд — і буде реальна відправка.");
+      leadForm.reset();
+    });
+
+    function fillDemo(){
+      leadForm.name.value = "Андрій";
+      leadForm.contact.value = "@andrii_manager";
+      leadForm.type.value = "Ресторан";
+      leadForm.need.value = "Все разом (3D + AI + Automation)";
+      leadForm.message.value = "Хочемо AI-бот для доставки, заявки в Telegram, 3D-меню для топ-страв. Інтеграція з нашим менеджером замовлень.";
+      toast("Заповнив демо даними ✅");
+    }
+
+    function fakeSend(where){
+      toast("Відправлено (демо) → " + where);
+    }
+
+    // Simple toast
+    let toastTimer = null;
+    function toast(text){
+      clearTimeout(toastTimer);
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.cssText = `
+          position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+          background:rgba(7,10,18,.80); color:rgba(234,240,255,.92);
+          border:1px solid rgba(255,255,255,.14);
+          padding:12px 14px; border-radius:16px; z-index:120;
+          box-shadow: 0 18px 55px rgba(0,0,0,.45);
+          backdrop-filter: blur(10px);
+          max-width:min(680px, calc(100% - 36px));
+          font-weight:900; letter-spacing:-.2px; font-size:13px; line-height:1.45;
+        `;
+        document.body.appendChild(t);
+      }
+      t.textContent = text;
+      t.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ t.style.opacity = "0"; }, 2600);
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // Chatbot demo (rule-based simulation)
+    const chat = document.getElementById('chat');
+    const chatBody = document.getElementById('chatBody');
+    const chatInput = document.getElementById('chatInput');
+
+    const state = {
+      step: 0,
+      order: { name:"", phone:"", address:"", items:"", note:"" }
+    };
+
+    function openChat(force){
+      const willOpen = (typeof force === "boolean") ? force : !chat.classList.contains('open');
+      chat.classList.toggle('open', willOpen);
+
+      if(willOpen && chatBody.childElementCount === 0){
+        bot("Привіт! Я RestaurantAI Bot 🤖\nМожу допомогти з меню, алергенами та прийняти доставку.\nНапиши: “хочу доставку” або “меню”.");
+      }
+      setTimeout(()=> chatInput?.focus(), 60);
+    }
+
+    chatInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        sendChat();
+      }
+    });
+
+    function sendChat(){
+      const text = (chatInput.value || "").trim();
+      if(!text) return;
+      user(text);
+      chatInput.value = "";
+      reply(text);
+    }
+
+    function user(text){
+      addMsg(text, 'user');
+    }
+    function bot(text){
+      addMsg(text, 'bot');
+    }
+    function addMsg(text, who){
+      const el = document.createElement('div');
+      el.className = 'msg ' + who;
+      el.textContent = text;
+      chatBody.appendChild(el);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function reply(text){
+      const t = text.toLowerCase();
+
+      // quick intents
+      if(t.includes("меню")){
+        bot("Ось демо-меню: 🍔 Бургер, 🍕 Піца, 🍣 Суші.\nМожу порадити комбо: основна + напій зі знижкою.\nХочеш доставку? (напиши: “хочу доставку”)");
+        return;
+      }
+      if(t.includes("час") || t.includes("скільки") || t.includes("доставка")){
+        bot("Зазвичай доставка 30–55 хв (залежить від району). Хочеш оформити замовлення? Напиши: “хочу доставку”.");
+        return;
+      }
+      if(t.includes("алерген") || t.includes("склад")){
+        bot("Можу підказати склад і алергени для кожної страви.\nНапиши назву позиції (наприклад: “піца”) або “меню”.");
+        return;
+      }
+
+      // delivery flow
+      if(t.includes("хочу доставку") || t.includes("оформити")){
+        state.step = 1;
+        bot("Ок! Як тебе звати?");
+        return;
+      }
+
+      if(state.step === 1){
+        state.order.name = text;
+        state.step = 2;
+        bot("Дякую, " + state.order.name + " 😊\nЗалиш номер телефону (або Telegram).");
+        return;
+      }
+      if(state.step === 2){
+        state.order.phone = text;
+        state.step = 3;
+        bot("Адреса доставки? (місто/вулиця/будинок/квартира)");
+        return;
+      }
+      if(state.step === 3){
+        state.order.address = text;
+        state.step = 4;
+        bot("Що замовляємо? (перелічити позиції)\nНаприклад: “2 бургери, 1 кола”.");
+        return;
+      }
+      if(state.step === 4){
+        state.order.items = text;
+        state.step = 5;
+        bot("Коментар для кур’єра? (домофон/поверх/без дзвінка) або напиши “нема”.");
+        return;
+      }
+      if(state.step === 5){
+        state.order.note = (t.includes("нема") ? "—" : text);
+        state.step = 0;
+
+        bot("Прийнято ✅\n" +
+            "Ім’я: " + state.order.name + "\n" +
+            "Контакт: " + state.order.phone + "\n" +
+            "Адреса: " + state.order.address + "\n" +
+            "Замовлення: " + state.order.items + "\n" +
+            "Коментар: " + state.order.note + "\n\n" +
+            "Далі (в реальному проєкті) я відправляю це в Telegram/CRM і ставлю статуси клієнту.");
+
+        toast("Чат-замовлення оформлено (демо). Підключимо реальну доставку — і буде live.");
+        return;
+      }
+
+      // fallback
+      bot("Зрозумів. Для демо можеш написати: “меню”, “алергени”, “час доставки” або “хочу доставку”.");
+    }
+  </script>
+</body>
+</html>
 
